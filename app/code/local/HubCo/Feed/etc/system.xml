@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<!--http://alanstorm.com/custom_magento_system_configuration-->
+<config>
+	<tabs>
+		<hubco translate="label" module="hubco_feed">
+			<label>HubCo</label>
+			<sort_order>99999</sort_order>
+		</hubco>
+	</tabs>
+	<sections>
+		<feed_options translate="label" module="hubco_feed">
+			<label>Feeds</label>
+			<tab>hubco</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>1000</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<feeds translate="label">
+					<label>FEEDS</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>1</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<export_dir>
+							<label>Export Directory path</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>22</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</export_dir>
+					</fields>
+				</feeds>
+        <google translate="label">
+          <label>GOOGLE</label>
+          <frontend_type>text</frontend_type>
+          <sort_order>1</sort_order>
+          <show_in_default>1</show_in_default>
+          <show_in_website>1</show_in_website>
+          <show_in_store>1</show_in_store>
+          <fields>
+            <edge_store>
+              <label>Edge Store ID</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>22</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </edge_store>
+            <edge_file>
+              <label>Edge File Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>22</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </edge_file>
+            <edge_FTP_server>
+              <label>Edge FTP server</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>22</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </edge_FTP_server>
+            <edge_FTP_user>
+              <label>Edge FTP User</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>22</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </edge_FTP_user>
+            <edge_FTP_pass>
+              <label>Edge FTP Password</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>22</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </edge_FTP_pass>
+          </fields>
+        </google>
+				<all translate="label">
+          <label>All</label>
+          <frontend_type>text</frontend_type>
+          <sort_order>1</sort_order>
+          <show_in_default>1</show_in_default>
+          <show_in_website>1</show_in_website>
+          <show_in_store>1</show_in_store>
+          <fields>
+          <all_store>
+              <label>All Store ID</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+           </all_store>
+         <all_file>
+              <label>All File Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </all_file>
+           <all_FTP_server>
+              <label>All FTP server</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </all_FTP_server>
+            <all_FTP_user>
+              <label>All FTP User</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </all_FTP_user>
+            <all_FTP_pass>
+              <label>All FTP Password</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </all_FTP_pass>
+           </fields>
+        </all>
+
+			</groups>
+		</feed_options>
+	</sections>
+</config>

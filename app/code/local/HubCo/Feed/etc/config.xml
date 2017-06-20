@@ -1,0 +1,285 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<HubCo_Feed>
+			<!-- This is the version number that our module is currently at. In order
+				for setup scripts to run, their version number must be less than or equal
+				to this value. As we add upgrade scripts, we increment this value. The next
+				time your Magento instance is accessed, Magento will compare values in the
+				database table 'core_resource' against this value. If the database is lower,
+				it will attempt to run any setup scripts for the module and then update the
+				database table to match this value. -->
+			<version>0.1.0</version>
+		</HubCo_Feed>
+	</modules>
+	<global>
+
+		<!-- add an adminhtml block definition -->
+		<blocks>
+			<hubco_feed_adminhtml>
+				<class>HubCo_Feed_Block_Adminhtml</class>
+			</hubco_feed_adminhtml>
+			<hubco_feed>
+				<class>HubCo_Feed_Block</class>
+			</hubco_feed>
+		</blocks>
+
+		<!-- Add a helper definition for use in adminhtml.xml menu translation. -->
+		<helpers>
+			<hubco_feed>
+				<class>HubCo_Feed_Helper</class>
+			</hubco_feed>
+		</helpers>
+
+		<models>
+
+			<!-- This is the model alias referred to in install-0.0.1.php. -->
+			<hubco_feed>
+				<!-- This tells Magento where to find models for this module. -->
+				<class>HubCo_Feed_Model</class>
+
+				<!-- This tells Magento where to find resource materials for this module. -->
+				<resourceModel>hubco_feed_resource</resourceModel>
+
+			</hubco_feed>
+
+			<!-- This alias must match the <resourceModel/> value above. -->
+			<hubco_feed_resource>
+				<!-- This tells Magento where to find resource models for this module. -->
+				<class>HubCo_Feed_Model_Resource</class>
+
+				<entities>
+
+					<!-- This is the table alias referred to in install-0.0.1.php. -->
+					<feed>
+						<!-- This is the name of the database table itself. -->
+						<table>hubco_feed_feed</table>
+					</feed>				</entities>
+
+			</hubco_feed_resource>
+
+		</models>
+
+		<resources>
+
+
+			<!-- This must match our folder name in the module sql folder. -->
+			<hubco_feed_setup>
+
+				<setup>
+
+					<!-- This defines which module the setup scripts in this location belong
+						to. -->
+					<module>HubCo_Feed</module>
+
+					<!-- In each setup script, this value determines the class of $this. -->
+					<class>Mage_Core_Model_Resource_Setup</class>
+
+				</setup>
+
+				<!-- This is relevant only if you have multiple database connections. -->
+				<connection>
+					<use>core_setup</use>
+				</connection>
+
+			</hubco_feed_setup>
+
+		</resources>
+
+	</global>
+
+	<!-- Add a router for access to our admin panel controller. -->
+	<admin>
+		<routers>
+
+			<!-- This is the alias for this router. -->
+			<hubco_feed_admin>
+
+				<!-- This basically informs Magento to use the admin scope for requests
+					to this router. -->
+				<use>admin</use>
+
+				<args>
+					<!-- This tells Magento where to find adminhtml controllers for this
+						module. -->
+					<module>HubCo_Feed_Adminhtml</module>
+
+					<!-- This is the term used in the actual URL. -->
+					<frontName>feed-admin</frontName>
+				</args>
+
+			</hubco_feed_admin>
+
+		</routers>
+	</admin>
+
+	<adminhtml>
+		<layout>
+			<updates>
+				<hubco_feed>
+					<file>hubco_feed.xml</file>
+				</hubco_feed>
+			</updates>
+		</layout>
+		<acl>
+			<resources>
+				<admin>
+					<children>
+						<system>
+							<children>
+								<config>
+									<children>
+										<feed_options>
+											<title>Feed Config Options</title>
+										</feed_options>
+									</children>
+								</config>
+							</children>
+						</system>
+					</children>
+				</admin>
+			</resources>
+		</acl>
+	</adminhtml>
+	<crontab>
+    <jobs>
+    <!--   <hubco_wps_ftpPull>
+        <schedule>
+          <cron_expr>5 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/crontab::ftpDaily</model>
+        </run>
+      </hubco_wps_ftpPull>
+      <hubco_wps_APIPull>
+        <schedule>
+          <cron_expr>*/15 * * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/apidata::apiPull</model>
+        </run>
+      </hubco_wps_APIPull>
+      <hubco_wps_RawQty>
+        <schedule>
+          <cron_expr>10 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/rawqty::update</model>
+        </run>
+      </hubco_wps_RawQty>
+      <hubco_wps_RawFtpPrice>
+        <schedule>
+          <cron_expr>12 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/rawftpprice::update</model>
+        </run>
+      </hubco_wps_RawFtpPrice>
+      <hubco_wps_APIUpdate>
+        <schedule>
+          <cron_expr>14 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/apidata::update</model>
+        </run>
+      </hubco_wps_APIUpdate>
+      <hubco_wps_RawDataUpdate>
+        <schedule>
+          <cron_expr>16 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/rawdata::update</model>
+        </run>
+      </hubco_wps_RawDataUpdate>
+      <hubco_wps_CleanDataUpdate>
+        <schedule>
+          <cron_expr>18 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleandata::update</model>
+        </run>
+      </hubco_wps_CleanDataUpdate>
+      <hubco_wps_CleanDataUpdateDesc>
+        <schedule>
+          <cron_expr>20 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleandata::updateDescription</model>
+        </run>
+      </hubco_wps_CleanDataUpdateDesc>
+      <hubco_wps_CleanDataTransfer>
+        <schedule>
+          <cron_expr>28 9,21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleandata::transferCleaned</model>
+        </run>
+      </hubco_wps_CleanDataTransfer>
+      <hubco_wps_CleanBrand>
+        <schedule>
+          <cron_expr>5 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleandata::cleanBrand</model>
+        </run>
+      </hubco_wps_CleanBrand>
+      <hubco_wps_CleanTitle>
+        <schedule>
+          <cron_expr>8 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleandata::cleanTitle</model>
+        </run>
+      </hubco_wps_CleanTitle>
+      <hubco_wps_CleanDescription>
+        <schedule>
+          <cron_expr>11 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleandata::cleanDescription</model>
+        </run>
+      </hubco_wps_CleanDescription>
+      <hubco_wps_CleanAttributesUpdate>
+        <schedule>
+          <cron_expr>13 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleanattributes::update</model>
+        </run>
+      </hubco_wps_CleanAttributesUpdate>
+      <hubco_wps_CleanAttributesClean>
+        <schedule>
+          <cron_expr>15 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleanattributes::clean</model>
+        </run>
+      </hubco_wps_CleanAttributesClean>
+      <hubco_wps_CleanFitmentsUpdate>
+        <schedule>
+          <cron_expr>17 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleanfitments::update</model>
+        </run>
+      </hubco_wps_CleanFitmentsUpdate>
+      <hubco_wps_CleanFitmentsMake>
+        <schedule>
+          <cron_expr>19 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleanfitments::cleanMake</model>
+        </run>
+      </hubco_wps_CleanFitmentsMake>
+      <hubco_wps_CleanFitmentsModel>
+        <schedule>
+          <cron_expr>21 10-22 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_wps/cleanfitments::cleanModel</model>
+        </run>
+      </hubco_wps_CleanFitmentsModel>
+-->
+    </jobs>
+  </crontab>
+</config>

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<config>
+	<!-- We are defining a new menu item for the admin panel. -->
+	<menu>
+		<suppliers>
+			<children>
+				<!-- First, create a top-level menu item, which will appear alongside
+					CMS -->
+				<hubco_feed translate="title" module="hubco_feed">
+					<title>Feed</title>
+					<sort_order>85</sort_order>
+					<depends>
+						<module>HubCo_Feed</module>
+					</depends>
+
+					<!-- Under this top-level menu, create a child menu item. -->
+					<children>
+						<manual translate="title" module="hubco_feed">
+							<title>Manual Conrol</title>
+							<sort_order>1</sort_order>
+
+							<!-- When the menu is clicked, take the user here. -->
+							<action>hubco_feed_admin/manual</action>
+
+						</manual>
+						<feed translate="title" module="hubco_feed">
+							<title>Feed</title>
+							<sort_order>2</sort_order>
+
+							<!-- When the menu is clicked, take the user here. -->
+							<action>hubco_feed_admin/feed</action>
+
+						</feed>
+					</children>
+				</hubco_feed>
+			</children>
+		</suppliers>
+	</menu>
+
+	<!-- Define ACL for access to these menu items. -->
+	<acl>
+		<resources>
+			<admin>
+				<children>
+					<hubco_feed translate="title" module="hubco_feed">
+						<title>Feed</title>
+						<sort_order>85</sort_order>
+						<children>
+							<feed translate="title" module="hubco_feed">
+								<title>Manage Feed</title>
+							</feed>
+						</children>
+					</hubco_feed>
+				</children>
+			</admin>
+		</resources>
+	</acl>
+</config>
