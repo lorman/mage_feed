@@ -125,6 +125,35 @@ extends Mage_Core_Model_Abstract
     $store = Mage::app()->getStore($storeId);
     $brands = Mage::getModel('hubco_brand/brand')->getAvailableBrands();
 
+    $name='color';
+    $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+    $options = $attributeModel->getSource()->getAllOptions(false);
+    $colors = array();
+    foreach ($options as $row) {
+      $colors[$row['value']] = $row['label'];
+    }
+    $name='size';
+    $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+    $options = $attributeModel->getSource()->getAllOptions(false);
+    $sizes = array();
+    foreach ($options as $row) {
+      $sizes[$row['value']] = $row['label'];
+    }
+    $name='gender';
+    $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+    $options = $attributeModel->getSource()->getAllOptions(false);
+    $genders = array();
+    foreach ($options as $row) {
+      $genders[$row['value']] = $row['label'];
+    }
+    $name='age';
+    $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+    $options = $attributeModel->getSource()->getAllOptions(false);
+    $ages = array();
+    foreach ($options as $row) {
+      $ages[$row['value']] = $row['label'];
+    }
+
     $country = 'US';  // use short country code
     $region = '23';   // must be numeric!
     $postcode = '60062';
@@ -267,22 +296,22 @@ extends Mage_Core_Model_Abstract
 
       if ($row['color']!= NULL or $row['color'] != '')
       {
-        fwrite ($fh, "<g:color>".htmlspecialchars($row['color'])."</g:color>".PHP_EOL);
+        fwrite ($fh, "<g:color>".htmlspecialchars($colors[$row['color']])."</g:color>".PHP_EOL);
       }
 
       if ($row['size']!= NULL or $row['size'] != '')
       {
-        fwrite ($fh, "<g:size>".htmlspecialchars($row['size'])."</g:size>".PHP_EOL);
+        fwrite ($fh, "<g:size>".htmlspecialchars($sizes[$row['size']])."</g:size>".PHP_EOL);
       }
 
       if ($row['gender']!= NULL or $row['gender'] != '')
       {
-        fwrite ($fh, "<g:gender>".htmlspecialchars($row['gender'])."</g:gender>".PHP_EOL);
+        fwrite ($fh, "<g:gender>".htmlspecialchars($genders[$row['gender']])."</g:gender>".PHP_EOL);
       }
 
       if ($row['age']!= NULL or $row['age'] != '')
       {
-        fwrite ($fh, "<g:age>".htmlspecialchars($row['age'])."</g:age>".PHP_EOL);
+        fwrite ($fh, "<g:age>".htmlspecialchars($ages[$row['age']])."</g:age>".PHP_EOL);
       }
 
       if ($row['upc']!= NULL or $row['upc'] != '')

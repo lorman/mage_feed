@@ -189,7 +189,7 @@ class HubCo_Feed_Model_FeedAll
     $websiteID = $store->getWebsiteId();
     $query = "SET SESSION group_concat_max_len = 8192";
     $this->pdoDb->query($query);
-    $query = "SELECT  P.*, S.*, PR.*,MAX(P.entity_id) as category_id
+    $query = "SELECT  P.*, S.*, PR.*,MAX(P.entity_id) as cat_id,
     GROUP_CONCAT(DISTINCT CONCAT(D.attribute_id, '|', D.`value`) SEPARATOR ';|;') AS 'Decimal',
     GROUP_CONCAT(DISTINCT CONCAT(I.attribute_id, '|', I.`value`) SEPARATOR ';|;') as 'Integer',
     GROUP_CONCAT(DISTINCT CONCAT(T.attribute_id, '|', T.`value`) SEPARATOR ';|;') as 'Text',
@@ -216,9 +216,12 @@ class HubCo_Feed_Model_FeedAll
     AND PR.website_id = $websiteID
     AND PR.customer_group_id = 0
     AND P.entity_id = CP.product_id AND C.entity_id = CP.category_id AND CP.store_id = 2
-    GROUP BY P.sku";
-
+    GROUP BY P.sku
+    LIMIT 1000";
+echo $query;
+exit;
      $url = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'. $url;
+
 //     $fh = fopen($url, "w");
 //     if ($fh === false) {
 //       return "File Open Error";
@@ -234,10 +237,14 @@ class HubCo_Feed_Model_FeedAll
 //         fputcsv($fh, $myField, '|');
 //       }
 //     }
-
      foreach ($this->pdoDb->query($query) as $row) {
-
-
+       echo $row['cat_id'];
+       echo "<br><br>";
+       var_dump($allCategoriesArray[$row['cat_id']]);
+       echo "<br><br>";
+       var_dump($allCategoriesArray);
+       echo "<br><br>";
+exit;
       $row = array_merge($row, $this->expl_string($row, $types, $needed_attributes));
       var_dump($row);
       exit;
