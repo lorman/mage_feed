@@ -30,9 +30,23 @@ class HubCo_Feed_Adminhtml_ManualController
       return $this->_redirect(
           'hubco_feed_admin/manual/index'
       );
-
-
     }
+
+    public function testEdgeGoogleAction() {
+
+      $success = Mage::getSingleton('hubco_feed/feed')->exportEdgeGoogle(true);
+      if ($success)
+        $this->_getSession()->addSuccess(
+            $this->__('Exported')
+        );
+      else
+        $this->_getSession()->addError(  $success
+        );
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
+    }
+
     public function exportAllAction() {
 
       $success = Mage::getSingleton('hubco_feed/feedAll')->export();

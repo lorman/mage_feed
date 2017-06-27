@@ -59,6 +59,14 @@
               <show_in_website>1</show_in_website>
               <show_in_store>1</show_in_store>
             </edge_file>
+            <edge_test>
+              <label>Edge Test File Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>22</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </edge_test>
             <edge_FTP_server>
               <label>Edge FTP server</label>
               <frontend_type>text</frontend_type>

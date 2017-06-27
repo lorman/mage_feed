@@ -143,143 +143,14 @@
 	</adminhtml>
 	<crontab>
     <jobs>
-    <!--   <hubco_wps_ftpPull>
+      <hubco_feed_edgeGoogle>
         <schedule>
-          <cron_expr>5 9,21 * * *</cron_expr>
+          <cron_expr>57 */2 * * *</cron_expr>
         </schedule>
         <run>
-          <model>hubco_wps/crontab::ftpDaily</model>
+          <model>hubco_feed/feed::exportEdgeGoogle</model>
         </run>
-      </hubco_wps_ftpPull>
-      <hubco_wps_APIPull>
-        <schedule>
-          <cron_expr>*/15 * * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/apidata::apiPull</model>
-        </run>
-      </hubco_wps_APIPull>
-      <hubco_wps_RawQty>
-        <schedule>
-          <cron_expr>10 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/rawqty::update</model>
-        </run>
-      </hubco_wps_RawQty>
-      <hubco_wps_RawFtpPrice>
-        <schedule>
-          <cron_expr>12 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/rawftpprice::update</model>
-        </run>
-      </hubco_wps_RawFtpPrice>
-      <hubco_wps_APIUpdate>
-        <schedule>
-          <cron_expr>14 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/apidata::update</model>
-        </run>
-      </hubco_wps_APIUpdate>
-      <hubco_wps_RawDataUpdate>
-        <schedule>
-          <cron_expr>16 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/rawdata::update</model>
-        </run>
-      </hubco_wps_RawDataUpdate>
-      <hubco_wps_CleanDataUpdate>
-        <schedule>
-          <cron_expr>18 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleandata::update</model>
-        </run>
-      </hubco_wps_CleanDataUpdate>
-      <hubco_wps_CleanDataUpdateDesc>
-        <schedule>
-          <cron_expr>20 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleandata::updateDescription</model>
-        </run>
-      </hubco_wps_CleanDataUpdateDesc>
-      <hubco_wps_CleanDataTransfer>
-        <schedule>
-          <cron_expr>28 9,21 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleandata::transferCleaned</model>
-        </run>
-      </hubco_wps_CleanDataTransfer>
-      <hubco_wps_CleanBrand>
-        <schedule>
-          <cron_expr>5 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleandata::cleanBrand</model>
-        </run>
-      </hubco_wps_CleanBrand>
-      <hubco_wps_CleanTitle>
-        <schedule>
-          <cron_expr>8 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleandata::cleanTitle</model>
-        </run>
-      </hubco_wps_CleanTitle>
-      <hubco_wps_CleanDescription>
-        <schedule>
-          <cron_expr>11 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleandata::cleanDescription</model>
-        </run>
-      </hubco_wps_CleanDescription>
-      <hubco_wps_CleanAttributesUpdate>
-        <schedule>
-          <cron_expr>13 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleanattributes::update</model>
-        </run>
-      </hubco_wps_CleanAttributesUpdate>
-      <hubco_wps_CleanAttributesClean>
-        <schedule>
-          <cron_expr>15 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleanattributes::clean</model>
-        </run>
-      </hubco_wps_CleanAttributesClean>
-      <hubco_wps_CleanFitmentsUpdate>
-        <schedule>
-          <cron_expr>17 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleanfitments::update</model>
-        </run>
-      </hubco_wps_CleanFitmentsUpdate>
-      <hubco_wps_CleanFitmentsMake>
-        <schedule>
-          <cron_expr>19 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleanfitments::cleanMake</model>
-        </run>
-      </hubco_wps_CleanFitmentsMake>
-      <hubco_wps_CleanFitmentsModel>
-        <schedule>
-          <cron_expr>21 10-22 * * *</cron_expr>
-        </schedule>
-        <run>
-          <model>hubco_wps/cleanfitments::cleanModel</model>
-        </run>
-      </hubco_wps_CleanFitmentsModel>
--->
+      </hubco_feed_edgeGoogle>
     </jobs>
   </crontab>
 </config>
