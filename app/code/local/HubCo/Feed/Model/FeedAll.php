@@ -83,12 +83,40 @@ class HubCo_Feed_Model_FeedAll
   public function exportAll($storeId, $url)
   {
 
-
-
-
-
      $store = Mage::app()->getStore($storeId);
      $brands = Mage::getModel('hubco_brand/brand')->getAvailableBrands();
+
+     $name='color';
+     $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+     $options = $attributeModel->getSource()->getAllOptions(false);
+     $colors = array();
+     foreach ($options as $row) {
+       $colors[$row['value']] = $row['label'];
+     }
+
+     $name='size';
+     $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+     $options = $attributeModel->getSource()->getAllOptions(false);
+     $sizes = array();
+     foreach ($options as $row) {
+       $sizes[$row['value']] = $row['label'];
+     }
+
+     $name='gender';
+     $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+     $options = $attributeModel->getSource()->getAllOptions(false);
+     $genders = array();
+     foreach ($options as $row) {
+       $genders[$row['value']] = $row['label'];
+     }
+     $name='age';
+     $attributeModel = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $name);
+     $options = $attributeModel->getSource()->getAllOptions(false);
+     $ages = array();
+     foreach ($options as $row) {
+       $ages[$row['value']] = $row['label'];
+     }
+
 
 //     $country = 'US';  // use short country code
 //     $region = '23';   // must be numeric!
@@ -110,9 +138,9 @@ class HubCo_Feed_Model_FeedAll
 //     $taxRate = $taxCalculationModel->getRate($TaxRequest);
 
 
-//  //   $base_url = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
-//     $base_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
-//     $media_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
+      //$base_url = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+      $base_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+      $media_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
 
      /////// categories
      $allCategoriesCollection = Mage::getModel ( 'catalog/category' )->getCollection ()
@@ -171,7 +199,7 @@ class HubCo_Feed_Model_FeedAll
     ->addSetInfo()
     ->getData();
 //'UniqueRetailerID','SKU','ProductTitle','LongDescription','ShortDescription','Brand','ManufacturerModel','MPN','UPC','EAN','OtherReferenceNumber','MerchantCategory','Retailer Price','AMZ MIN PRICE','AMZ MAX PRICE','ImageURL','StockQuantity','ProductURL','Weight','Length','Width','Height','neweggCat','searsCat','jetCat','googleCat','amazonCat','PriceFallsCat','Condition','priceDisc','cost','MSRP','MAPPED','ASIN','ITkeyword','labels','IsFreeShipping','color','size','gender','genderSears','isAmazon','isRakuten','isNewegg','isSears','isJet','isWalmart','Fulfilment Latency','Product Tax Code','ACA Brand'
-    $needed_attribute_codes = array('sku','name', 'description','short_description','brand_id','mpn','upc','AMZ MIN PRICE','AMZ MAX PRICE', 'image', 'weight', 'google_taxonomy', 'color', 'size', 'gender', 'url_key','asin',);
+    $needed_attribute_codes = array('sku','name', 'description','short_description','brand_id','mpn','upc','AMZ MIN PRICE','AMZ MAX PRICE', 'image', 'weight', 'google_taxonomy', 'color', 'size', 'gender', 'url_key','asin','msrp');
     $needed_attribute_ids = array();
     $needed_attributes = array();
     $google_attribute_id;
@@ -189,7 +217,7 @@ class HubCo_Feed_Model_FeedAll
     $websiteID = $store->getWebsiteId();
     $query = "SET SESSION group_concat_max_len = 8192";
     $this->pdoDb->query($query);
-    $query = "SELECT  P.*, S.*, PR.*,MAX(P.entity_id) as cat_id,
+    $query = "SELECT  P.*, S.*, PR.*,MAX(C.entity_id) as category_id,
     GROUP_CONCAT(DISTINCT CONCAT(D.attribute_id, '|', D.`value`) SEPARATOR ';|;') AS 'Decimal',
     GROUP_CONCAT(DISTINCT CONCAT(I.attribute_id, '|', I.`value`) SEPARATOR ';|;') as 'Integer',
     GROUP_CONCAT(DISTINCT CONCAT(T.attribute_id, '|', T.`value`) SEPARATOR ';|;') as 'Text',
@@ -198,9 +226,10 @@ class HubCo_Feed_Model_FeedAll
     FROM
       (`catalog_product_entity` P,
       `cataloginventory_stock_item` S,
-      `catalog_product_index_price` PR,
-      `catalog_category_product_index` CP, `catalog_category_entity` C
+      `catalog_product_index_price` PR
       )
+      LEFT JOIN `catalog_category_product_index` CP ON P.entity_id = CP.product_id AND CP.store_id = 2
+      LEFT JOIN `catalog_category_entity` C ON C.entity_id = CP.category_id
       LEFT JOIN `catalog_product_entity_decimal` D ON P.entity_id = D.entity_id
         AND D.attribute_id IN ($needed_ids)
       LEFT JOIN `catalog_product_entity_int` I ON I.entity_id =  P.entity_id
@@ -215,38 +244,96 @@ class HubCo_Feed_Model_FeedAll
     AND S.qty > 0
     AND PR.website_id = $websiteID
     AND PR.customer_group_id = 0
-    AND P.entity_id = CP.product_id AND C.entity_id = CP.category_id AND CP.store_id = 2
     GROUP BY P.sku
     LIMIT 1000";
-echo $query;
-exit;
+
      $url = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'. $url;
+echo $url;
+    $fh = fopen($url, "w");
+    if ($fh === false) {
+      return "File Open Error";
+    }
+    // output the column headings
+    $header = array('UniqueRetailerID','SKU','ProductTitle','LongDescription','ShortDescription','Brand','ManufacturerModel','MPN','UPC','EAN','OtherReferenceNumber','MerchantCategory','Retailer Price','AMZ MIN PRICE','AMZ MAX PRICE','ImageURL','StockQuantity','ProductURL','Weight','Length','Width','Height','neweggCat','searsCat','jetCat','googleCat','amazonCat','PriceFallsCat','Condition','priceDisc','cost','MSRP','MAPPED','ASIN','ITkeyword','labels','IsFreeShipping','color','size','gender','genderSears','isAmazon','isRakuten','isNewegg','isSears','isJet','isWalmart','Fulfilment Latency','Product Tax Code','ACA Brand');
 
-//     $fh = fopen($url, "w");
-//     if ($fh === false) {
-//       return "File Open Error";
-//     }
-//     // output the column headings
-//     $header = array('UniqueRetailerID','SKU','ProductTitle','LongDescription','ShortDescription','Brand','ManufacturerModel','MPN','UPC','EAN','OtherReferenceNumber','MerchantCategory','Retailer Price','AMZ MIN PRICE','AMZ MAX PRICE','ImageURL','StockQuantity','ProductURL','Weight','Length','Width','Height','neweggCat','searsCat','jetCat','googleCat','amazonCat','PriceFallsCat','Condition','priceDisc','cost','MSRP','MAPPED','ASIN','ITkeyword','labels','IsFreeShipping','color','size','gender','genderSears','isAmazon','isRakuten','isNewegg','isSears','isJet','isWalmart','Fulfilment Latency','Product Tax Code','ACA Brand');
+    //fwrite($fh,"UniqueRetailerID,SKU,ProductTitle,LongDescription,ShortDescription,Brand,
+    //ManufacturerModel,MPN,UPC,EAN,OtherReferenceNumber,MerchantCategory,Retailer Price,
+    //AMZ MIN PRICE,AMZ MAX PRICE,ImageURL,StockQuantity,ProductURL,Weight,Length,Width,Height,
+    //neweggCat,searsCat,jetCat,googleCat,amazonCat,PriceFallsCat,Condition,priceDisc,
+    //cost,MSRP,MAPPED,ASIN,ITkeyword,labels,IsFreeShipping,color,size,gender,genderSears,
+    //isAmazon,isRakuten,isNewegg,isSears,isJet,isWalmart,Fulfilment Latency,
+    //Product Tax Code,ACA Brand\n");
 
-    //fwrite($fh,"UniqueRetailerID,SKU,ProductTitle,LongDescription,ShortDescription,Brand,ManufacturerModel,MPN,UPC,EAN,OtherReferenceNumber,MerchantCategory,Retailer Price,AMZ MIN PRICE,AMZ MAX PRICE,ImageURL,StockQuantity,ProductURL,Weight,Length,Width,Height,neweggCat,searsCat,jetCat,googleCat,amazonCat,PriceFallsCat,Condition,priceDisc,cost,MSRP,MAPPED,ASIN,ITkeyword,labels,IsFreeShipping,color,size,gender,genderSears,isAmazon,isRakuten,isNewegg,isSears,isJet,isWalmart,Fulfilment Latency,Product Tax Code,ACA Brand\n");
-//     fputcsv($fh, $header);
-
-//     if(isset($trend)){
-//       foreach ( $trend as $myField ){
-//         fputcsv($fh, $myField, '|');
-//       }
-//     }
-     foreach ($this->pdoDb->query($query) as $row) {
-       echo $row['cat_id'];
-       echo "<br><br>";
-       var_dump($allCategoriesArray[$row['cat_id']]);
-       echo "<br><br>";
-       var_dump($allCategoriesArray);
-       echo "<br><br>";
-exit;
-      $row = array_merge($row, $this->expl_string($row, $types, $needed_attributes));
+    $error = fputcsv($fh, $header);
+    echo $error;
+    // make array with keys from header
+    $strProdArray = array();
+      foreach ($header as $val)
+      {
+        $strProdArray[$val]= ' ';
+      }
+//       var_dump($strProdArray);
+//       exit;
+      foreach ($this->pdoDb->query($query) as $row) {
+      //$strProdArray = array();
+      $categoryBySku['pathStr'] = $allCategoriesArray[$row['category_id']]['pathStr'];
+      $row = array_merge($row, $this->expl_string($row, $types, $needed_attributes), $categoryBySku);
+      echo "<br><br>";
       var_dump($row);
+//       exit;
+
+      $strProdArray['UniqueRetailerID'] = $row['sku'];
+      $strProdArray['SKU'] = $row['sku'];
+      $strProdArray['ProductTitle'] = $row['name'];
+      if (empty($row['description'])) $strProdArray['LongDescription'] = $row['name'];
+      else $strProdArray['LongDescription'] = $row['description'];
+      if (empty($row['short_description'])) $strProdArray['ShortDescription'] = $row['name'];
+      $strProdArray['ShortDescription'] = $row['short_description'];
+      $strProdArray['Brand'] = $brands[$row['brand_id']];
+      $strProdArray['ManufacturerModel'] = $row['mpn'];
+      $strProdArray['MPN'] = $row['mpn'];
+      if (strlen($row['upc']) == 12) $strProdArray['UPC'] = $row['upc'];
+      elseif (strleln($row['upc']) == 13) $strProdArray['EAN'] = $row['upc'];
+      else $strProdArray['OtherReferenceNumber'] =$row['upc'];
+      $strProdArray['MerchantCategory'] = $row['pathStr'];
+      $strProdArray['Retailer Price'] = $row['price'];
+//       $strProdArray[] = $row[''];
+//       $strProdArray[] = $row[''];
+       $strProdArray['ImageURL'] = $media_url;
+       $strProdArray['StockQuantity'] = $row['qty'];
+       $strProdArray['ProductURL'] = $base_url;
+       $strProdArray['Weight'] = $row['weight'];
+//       $strProdArray[] = $row[''];
+//       $strProdArray[] = $row[''];
+//       $strProdArray[] = $row[''];
+//       $strProdArray[] = $row[''];
+//       $strProdArray[] = $row[''];
+//        $strProdArray[] = $row[''];
+//        $strProdArray[] = $row[''];
+//        $strProdArray[] = $row[''];
+//        $strProdArray[] = $row[''];
+//        $strProdArray[] = $row[''];
+//        $strProdArray[] = $row[''];
+       $strProdArray['Condition'] = "new";
+       $strProdArray['MSRP'] = $row['msrp'];
+       $strProdArray['ASIN'] = $row['asin'];
+       $strProdArray['IsFreeShipping'] = "TRUE";
+       $strProdArray['color'] = $colors[$row['color']];
+       $strProdArray['size'] = $sizes[$row['size']];
+       $strProdArray['gender'] = $genders[$row['gender']];
+
+       $strProdArray['Fulfilment Latency'] = "3";
+       $strProdArray['Product Tax Code'] = "2048305";
+
+       //fwrite($fh,"UniqueRetailerID,SKU,ProductTitle,LongDescription,ShortDescription,Brand,
+       //ManufacturerModel,MPN,UPC,EAN,OtherReferenceNumber,MerchantCategory,Retailer Price,
+       //AMZ MIN PRICE,AMZ MAX PRICE,ImageURL,StockQuantity,ProductURL,Weight,Length,Width,Height,
+       //neweggCat,searsCat,jetCat,googleCat,amazonCat,PriceFallsCat,Condition,priceDisc,
+       //cost,MSRP,MAPPED,ASIN,ITkeyword,labels,IsFreeShipping,color,size,gender,genderSears,
+       //isAmazon,isRakuten,isNewegg,isSears,isJet,isWalmart,Fulfilment Latency,
+       //Product Tax Code,ACA Brand\n");
+      $error = fputcsv($fh,$strProdArray);
+      echo $error;
       exit;
 //       fwrite ($fh, "<item>".PHP_EOL);
 //       fwrite ($fh, "<g:id>".$row['sku']."</g:id>".PHP_EOL);

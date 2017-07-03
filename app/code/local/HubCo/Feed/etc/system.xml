@@ -91,6 +91,38 @@
               <show_in_website>1</show_in_website>
               <show_in_store>1</show_in_store>
             </edge_FTP_pass>
+            <ad_file>
+              <label>AdGroups File Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </ad_file>
+            <ad_num>
+              <label>AdGroups number of products in a group</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </ad_num>
+            <ad_cpc>
+              <label>AdGroups Max CPC value</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </ad_cpc>
+            <ad_name>
+              <label>AdGroups Campaign Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </ad_name>
           </fields>
         </google>
 				<all translate="label">
