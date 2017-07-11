@@ -44,17 +44,17 @@ extends Mage_Core_Model_Abstract
     $this->pdoDb->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
   }
 
-  public function exportEdgeGoogle ($test = false) {
+  public function exportMotorGoogle ($test = false) {
 
     if ($test != null && $test === true) {
-      $fileName = Mage::getStoreConfig ('feed_options/google/edge_test' );
-      $adGroupFileName = Mage::getStoreConfig ('feed_options/google/ad_file');
+      $fileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_test' );
+      $adGroupFileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_file');
     }
     else {
-      $fileName = Mage::getStoreConfig ('feed_options/google/edge_file' );
-      $adGroupFileName = Mage::getStoreConfig ('feed_options/google/ad_file');
+      $fileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_file' );
+      $adGroupFileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_file');
     }
-    $count = $this->exportGoogle(Mage::getStoreConfig ('feed_options/google/edge_store' ), $fileName, $adGroupFileName, $test);
+    $count = $this->exportGoogle(Mage::getStoreConfig ('feed_options/motorgoogle/motor_store' ), $fileName, $adGroupFileName, $test);
     Mage::getSingleton('adminhtml/session')->addError(
       Mage::helper('hubco_globalimport')->__("Generated $count Items.")
     );
@@ -81,8 +81,72 @@ extends Mage_Core_Model_Abstract
     $zip->addFile(Mage::getStoreConfig ('feed_options/feeds/export_dir').'/'.$adGroupFileName,$adGroupFileName);
     $zip->close();
     // upload the file to Google
-    $conn = ftp_connect(Mage::getStoreConfig ('feed_options/google/edge_FTP_server'));
-    $login = ftp_login($conn, Mage::getStoreConfig ('feed_options/google/edge_FTP_user'), Mage::getStoreConfig ('feed_options/google/edge_FTP_pass'));
+    $conn = ftp_connect(Mage::getStoreConfig ('feed_options/motorgoogle/motor_FTP_server'));
+    $login = ftp_login($conn, Mage::getStoreConfig ('feed_options/motorgoogle/motor_FTP_user'), Mage::getStoreConfig ('feed_options/motorgoogle/motor_FTP_pass'));
+    if (!$conn || !$login) {
+      Mage::getSingleton('adminhtml/session')->addError(
+        Mage::helper('hubco_globalimport')->__("Error Connecting to Google, feed not uploaded")
+      );
+      ftp_close($conn);
+    }
+    else {
+      // upload the file
+      $upload = ftp_put($conn, $fileName, $zipFile, FTP_BINARY);
+      // check upload status
+      if (!$upload) {
+        Mage::getSingleton('adminhtml/session')->addError(
+          Mage::helper('hubco_globalimport')->__("Google FTP Upload Failed")
+        );
+      }
+      else {
+        Mage::getSingleton('adminhtml/session')->addError(
+          Mage::helper('hubco_globalimport')->__("File Transmitted to Google")
+        );
+      }
+    }
+    ftp_close($conn);
+    return "$test, $count, $upload";
+  }
+
+  public function exportEdgeGoogle ($test = false) {
+
+    if ($test != null && $test === true) {
+      $fileName = Mage::getStoreConfig ('feed_options/edgegoogle/edge_test' );
+      $adGroupFileName = Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_file');
+    }
+    else {
+      $fileName = Mage::getStoreConfig ('feed_options/edgegoogle/edge_file' );
+      $adGroupFileName = Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_file');
+    }
+    $count = $this->exportGoogle(Mage::getStoreConfig ('feed_options/edgegoogle/edge_store' ), $fileName, $adGroupFileName, $test);
+    Mage::getSingleton('adminhtml/session')->addError(
+      Mage::helper('hubco_globalimport')->__("Generated $count Items.")
+    );
+    // zip and FTP the file to google
+    // zip the file before upload
+    $zip = new ZipArchive;
+    $zipFile = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'.$fileName.".zip";
+    if (!$zip->open($zipFile, ZipArchive::CREATE|ZipArchive::OVERWRITE)) {
+      Mage::getSingleton('adminhtml/session')->addError(
+        Mage::helper('hubco_globalimport')->__("ZipFailed")
+      );
+    }
+    $zip->addFile(Mage::getStoreConfig ('feed_options/feeds/export_dir').'/'.$fileName,$fileName);
+    $zip->close();
+    // zip the Ad Group file before upload
+
+    $zip = new ZipArchive;
+    $zipFile = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'.$adGroupFileName.".zip";
+    if (!$zip->open($zipFile, ZipArchive::CREATE|ZipArchive::OVERWRITE)) {
+      Mage::getSingleton('adminhtml/session')->addError(
+      Mage::helper('hubco_globalimport')->__("ZipFailed")
+      );
+    }
+    $zip->addFile(Mage::getStoreConfig ('feed_options/feeds/export_dir').'/'.$adGroupFileName,$adGroupFileName);
+    $zip->close();
+    // upload the file to Google
+    $conn = ftp_connect(Mage::getStoreConfig ('feed_options/edgegoogle/edge_FTP_server'));
+    $login = ftp_login($conn, Mage::getStoreConfig ('feed_options/edgegoogle/edge_FTP_user'), Mage::getStoreConfig ('feed_options/edgegoogle/edge_FTP_pass'));
     if (!$conn || !$login) {
       Mage::getSingleton('adminhtml/session')->addError(
         Mage::helper('hubco_globalimport')->__("Error Connecting to Google, feed not uploaded")
@@ -227,9 +291,16 @@ extends Mage_Core_Model_Abstract
     }
 
     //fill out second file with ad groups for google
-    $numberProdInGroup = Mage::getStoreConfig ('feed_options/google/ad_num');
-    $cpcValue =  Mage::getStoreConfig ('feed_options/google/ad_cpc');
-    $campaignName = Mage::getStoreConfig ('feed_options/google/ad_c_name');
+    if ($storeId == Mage::getStoreConfig ('feed_options/motorgoogle/motor_store' )) {
+      $numberProdInGroup = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_num');
+      $cpcValue =  Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_cpc');
+      $campaignName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_name');
+    }
+    else {
+      $numberProdInGroup = Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_num');
+      $cpcValue =  Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_cpc');
+      $campaignName = Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_name');
+    }
 
     $fh2 = fopen($url2, "w");
     if ($fh2 === false) {
@@ -412,6 +483,26 @@ extends Mage_Core_Model_Abstract
       elseif ($row['price'] < 4000) fwrite($fh, '&lt;$4000');
       else fwrite($fh, '&gt;$4000+');
       fwrite($fh, "</g:custom_label_0>".PHP_EOL);
+
+      // custom label for margin
+      fwrite($fh, "<g:custom_label_1>");
+      $margin = $row['price'] * .1;
+      if ($margin<-98) fwrite($fh, "-99\$M");
+      elseif ($margin<-75) fwrite($fh, "-98-&gt;-75\$M");
+      elseif ($margin<-50) fwrite($fh, "-74-&gt;-50\$M");
+      elseif ($margin<-25) fwrite($fh, "-49-&gt;-25\$M");
+      elseif ($margin<-5) fwrite($fh, "-24-&gt;-5\$M");
+      elseif ($margin<0) fwrite($fh, "-4-&gt;0\$M");
+      elseif ($margin<5) fwrite($fh, "0-&gt;4\$M");
+      elseif ($margin<10) fwrite($fh, "5-&gt;10\$M");
+      elseif ($margin<20) fwrite($fh, "11-&gt;20\$M");
+      elseif ($margin<30) fwrite($fh, "21-&gt;30\$M");
+      elseif ($margin<40) fwrite($fh, "31-&gt;40\$M");
+      elseif ($margin<50) fwrite($fh, "41-&gt;50\$M");
+      elseif ($margin<75) fwrite($fh, "51-&gt;75\$M");
+      elseif ($margin<100) fwrite($fh, "76-&gt;100\$M");
+      else fwrite($fh, "100-&gt;\$M");
+      fwrite($fh, "</g:custom_label_1>".PHP_EOL);
 
       // custom label for MAP
       fwrite($fh, "<g:custom_label_3>");

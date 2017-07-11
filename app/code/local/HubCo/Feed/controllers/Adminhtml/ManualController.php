@@ -47,6 +47,36 @@ class HubCo_Feed_Adminhtml_ManualController
       );
     }
 
+    public function exportMotorGoogleAction() {
+
+      $success = Mage::getSingleton('hubco_feed/feed')->exportMotorGoogle();
+      if ($success)
+        $this->_getSession()->addSuccess(
+            $this->__('Exported')
+        );
+      else
+        $this->_getSession()->addError(  $success
+        );
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
+    }
+
+    public function testMotorGoogleAction() {
+
+      $success = Mage::getSingleton('hubco_feed/feed')->exportMotorGoogle(true);
+      if ($success)
+        $this->_getSession()->addSuccess(
+            $this->__('Exported')
+        );
+      else
+        $this->_getSession()->addError(  $success
+        );
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
+    }
+
     public function exportAllAction() {
 
       $success = Mage::getSingleton('hubco_feed/feedAll')->export();
