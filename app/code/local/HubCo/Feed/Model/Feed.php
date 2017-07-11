@@ -136,8 +136,8 @@ extends Mage_Core_Model_Abstract
     // zip the Ad Group file before upload
 
     $zip = new ZipArchive;
-    $zipFile = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'.$adGroupFileName.".zip";
-    if (!$zip->open($zipFile, ZipArchive::CREATE|ZipArchive::OVERWRITE)) {
+    $zipFile2 = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'.$adGroupFileName.".zip";
+    if (!$zip->open($zipFile2, ZipArchive::CREATE|ZipArchive::OVERWRITE)) {
       Mage::getSingleton('adminhtml/session')->addError(
       Mage::helper('hubco_globalimport')->__("ZipFailed")
       );
