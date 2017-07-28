@@ -151,6 +151,14 @@
           <model>hubco_feed/feed::exportEdgeGoogle</model>
         </run>
       </hubco_feed_edgeGoogle>
+      <hubco_feed_motorGoogle>
+        <schedule>
+          <cron_expr>53 */2 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_feed/feed::exportMotorGoogle</model>
+        </run>
+      </hubco_feed_motorGoogle>
     </jobs>
   </crontab>
 </config>
