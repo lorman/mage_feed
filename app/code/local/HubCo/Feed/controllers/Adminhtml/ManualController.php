@@ -62,6 +62,21 @@ class HubCo_Feed_Adminhtml_ManualController
       );
     }
 
+    public function exportMotorAdwordsAction() {
+
+      $success = Mage::getSingleton('hubco_feed/feed')->exportMotorAdwords();
+      if ($success)
+        $this->_getSession()->addSuccess(
+            $this->__('Exported')
+        );
+      else
+        $this->_getSession()->addError(  $success
+        );
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
+    }
+
     public function testMotorGoogleAction() {
 
       $success = Mage::getSingleton('hubco_feed/feed')->exportMotorGoogle(true);
@@ -92,6 +107,38 @@ class HubCo_Feed_Adminhtml_ManualController
       );
 
 
+    }
+
+
+
+    public function exportMotorSitemapAction() {
+
+      $success = Mage::getSingleton('hubco_feed/feed')->exportMotorSitemap();
+      if ($success)
+        $this->_getSession()->addSuccess(
+            $this->__('Exported')
+        );
+      else
+        $this->_getSession()->addError(  $success
+        );
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
+    }
+
+    public function exportEdgeSitemapAction() {
+
+      $success = Mage::getSingleton('hubco_feed/feed')->exportEdgeSitemap();
+      if ($success)
+        $this->_getSession()->addSuccess(
+            $this->__('Exported')
+        );
+      else
+        $this->_getSession()->addError(  $success
+        );
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
     }
 
     /**

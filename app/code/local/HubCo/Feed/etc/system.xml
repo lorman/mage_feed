@@ -28,17 +28,25 @@
 						<export_dir>
 							<label>Export Directory path</label>
 							<frontend_type>text</frontend_type>
-							<sort_order>22</sort_order>
+							<sort_order>1</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
 						</export_dir>
+            <sitemap_dir>
+              <label>Export Directory path</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>2</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </sitemap_dir>
 					</fields>
 				</feeds>
         <edgegoogle translate="label">
           <label>EDGE GOOGLE</label>
           <frontend_type>text</frontend_type>
-          <sort_order>1</sort_order>
+          <sort_order>2</sort_order>
           <show_in_default>1</show_in_default>
           <show_in_website>1</show_in_website>
           <show_in_store>1</show_in_store>
@@ -123,12 +131,29 @@
               <show_in_website>1</show_in_website>
               <show_in_store>1</show_in_store>
             </edge_ad_name>
+
+            <sitemap_file>
+              <label>Sitemap File Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>98</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </sitemap_file>
+            <sitemap_size>
+              <label>Sitemap size (num url)</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>99</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </sitemap_size>
           </fields>
         </edgegoogle>
         <motorgoogle translate="label">
           <label>MOTOR GOOGLE</label>
           <frontend_type>text</frontend_type>
-          <sort_order>1</sort_order>
+          <sort_order>3</sort_order>
           <show_in_default>1</show_in_default>
           <show_in_website>1</show_in_website>
           <show_in_store>1</show_in_store>
@@ -213,12 +238,29 @@
               <show_in_website>1</show_in_website>
               <show_in_store>1</show_in_store>
             </motor_ad_name>
+
+            <sitemap_file>
+              <label>Sitemap File Name</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>98</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </sitemap_file>
+            <sitemap_size>
+              <label>Sitemap size (num url)</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>99</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </sitemap_size>
           </fields>
         </motorgoogle>
 				<all translate="label">
           <label>All</label>
           <frontend_type>text</frontend_type>
-          <sort_order>1</sort_order>
+          <sort_order>4</sort_order>
           <show_in_default>1</show_in_default>
           <show_in_website>1</show_in_website>
           <show_in_store>1</show_in_store>
@@ -263,6 +305,14 @@
               <show_in_website>1</show_in_website>
               <show_in_store>1</show_in_store>
             </all_FTP_pass>
+            <all_qty_threshold>
+              <label>All Qty Threshold</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>23</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+            </all_qty_threshold>
            </fields>
         </all>
 

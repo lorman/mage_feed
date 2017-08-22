@@ -48,13 +48,11 @@ extends Mage_Core_Model_Abstract
 
     if ($test != null && $test === true) {
       $fileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_test' );
-      $adGroupFileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_file');
     }
     else {
       $fileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_file' );
-      $adGroupFileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_file');
     }
-    $count = $this->exportGoogle(Mage::getStoreConfig ('feed_options/motorgoogle/motor_store' ), $fileName, $adGroupFileName, $test);
+    $count = $this->exportGoogle(Mage::getStoreConfig ('feed_options/motorgoogle/motor_store' ), $fileName, $test);
     Mage::getSingleton('adminhtml/session')->addError(
       Mage::helper('hubco_globalimport')->__("Generated $count Items.")
     );
@@ -69,17 +67,7 @@ extends Mage_Core_Model_Abstract
     }
     $zip->addFile(Mage::getStoreConfig ('feed_options/feeds/export_dir').'/'.$fileName,$fileName);
     $zip->close();
-    // zip the Ad Group file before upload
 
-    $zip = new ZipArchive;
-    $zipFile2 = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'.$adGroupFileName.".zip";
-    if (!$zip->open($zipFile2, ZipArchive::CREATE|ZipArchive::OVERWRITE)) {
-      Mage::getSingleton('adminhtml/session')->addError(
-      Mage::helper('hubco_globalimport')->__("ZipFailed")
-      );
-    }
-    $zip->addFile(Mage::getStoreConfig ('feed_options/feeds/export_dir').'/'.$adGroupFileName,$adGroupFileName);
-    $zip->close();
     // upload the file to Google
     $conn = ftp_connect(Mage::getStoreConfig ('feed_options/motorgoogle/motor_FTP_server'));
     $login = ftp_login($conn, Mage::getStoreConfig ('feed_options/motorgoogle/motor_FTP_user'), Mage::getStoreConfig ('feed_options/motorgoogle/motor_FTP_pass'));
@@ -106,6 +94,100 @@ extends Mage_Core_Model_Abstract
     }
     ftp_close($conn);
     return "$test, $count, $upload";
+  }
+
+  public function exportMotorAdwords() {
+    $adGroupFileName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_file');
+    $url2 = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'. $adGroupFileName;
+
+    //fill out second file with ad groups for google
+    $numberProdInGroup = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_num');
+    $cpcValue =  Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_cpc');
+    $campaignName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_name');
+
+    // get the maximum product entity ID to detemine how many Adwords files we need to write
+    $collection = Mage::getModel('catalog/product')->getCollection();
+    $collection->getSelect()->order('entity_id DESC');
+    $collection->setPageSize(1);
+    $maxId = $collection->getFirstItem()->getId();
+
+    $count = ceil($maxId/$numberProdInGroup);
+    $fhAdWords = array();
+    $urlFront = substr($url2, 0, strpos($url2,'.'));
+    $urlBack = substr($url2, strpos($url2,'.'));
+
+    //header of adwords file
+    $header = array('Campaign','Ad Group','CPA Bid','Max CPC','Max CPM',
+      'Display Network Custom Bid Type','Targeting optimization','Ad Group Type',
+      'Shopping ad','Product Group','Product Group Type','AdGroup Status','Status');
+    $strAdGroupArray = array();
+    foreach ($header as $val)
+    {
+      $strAdGroupArray [$val]= '';
+    }
+    $emptyAdGroupArray = $strAdGroupArray;
+
+    for ($i=0; $i<=$count; $i++) {
+      $urlTemp = $urlFront.$i.$urlBack;
+      $fhAdWords[$i] = fopen($urlTemp, "w");
+      $error = fputcsv($fhAdWords[$i], $header);
+    }
+
+    $query = "SELECT P.*, V.value as url_key FROM `catalog_product_entity` P, `catalog_product_entity_varchar` V, `eav_attribute` EA
+      WHERE P.entity_id = V.entity_id
+      AND V.attribute_id = EA.attribute_id
+      AND EA.attribute_code = 'url_key'";
+    $i = 0;
+    foreach ($this->pdoDb->query($query) as $row) {
+      $i++;
+      // write the adwords file data
+      $sessionNum = ceil($row['entity_id']/$numberProdInGroup);
+      $strAdGroupArray = $emptyAdGroupArray;
+      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
+      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
+      $strAdGroupArray['CPA Bid'] = '0';
+      $strAdGroupArray['Max CPC'] = $cpcValue;
+      $strAdGroupArray['Max CPM'] = '.01';
+      $strAdGroupArray['Display Network Custom Bid Type'] = 'None';
+      $strAdGroupArray['Targeting optimization'] = 'Disabled';
+      $strAdGroupArray['Ad Group Type'] = 'Default';
+      $strAdGroupArray['AdGroup Status'] = 'Paused';
+      fputcsv($fhAdWords[$sessionNum], $strAdGroupArray);
+      $strAdGroupArray = $emptyAdGroupArray;
+      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
+      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
+      $strAdGroupArray['Shopping ad'] = "[]";
+      $strAdGroupArray['AdGroup Status'] = 'Paused';
+      $strAdGroupArray['Status'] = 'Enabled';
+      fputcsv($fhAdWords[$sessionNum], $strAdGroupArray);
+      $strAdGroupArray = $emptyAdGroupArray;
+      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
+      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
+      $strAdGroupArray['Product Group'] = "* /";
+      $strAdGroupArray['Product Group Type'] = "Subdivision";
+      $strAdGroupArray['AdGroup Status'] = 'Paused';
+      $strAdGroupArray['Status'] = 'Enabled';
+      fputcsv($fhAdWords[$sessionNum], $strAdGroupArray);
+      $strAdGroupArray = $emptyAdGroupArray;
+      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
+      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
+      $strAdGroupArray['Product Group'] = "* / Item ID='".$row['sku']."'";
+      $strAdGroupArray['Max CPC'] = $cpcValue;
+      $strAdGroupArray['Product Group Type'] = "Biddable";
+      $strAdGroupArray['AdGroup Status'] = 'Paused';
+      $strAdGroupArray['Status'] = 'Enabled';
+      fputcsv($fhAdWords[$sessionNum], $strAdGroupArray);
+      $strAdGroupArray = $emptyAdGroupArray;
+      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
+      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
+      $strAdGroupArray['Max CPC'] = 'Excluded';
+      $strAdGroupArray['Product Group'] = "* / Item ID=*";
+      $strAdGroupArray['Product Group Type'] = "Excluded";
+      $strAdGroupArray['AdGroup Status'] = 'Paused';
+      $strAdGroupArray['Status'] = 'Enabled';
+      fputcsv($fhAdWords[$sessionNum], $strAdGroupArray);
+    }
+    return $i;
   }
 
   public function exportEdgeGoogle ($test = false) {
@@ -204,7 +286,7 @@ extends Mage_Core_Model_Abstract
     return trim($new_string);
   }
 
-  public function exportGoogle($storeId, $url, $url2, $test)
+  public function exportGoogle($storeId, $url, $test)
   {
     $store = Mage::app()->getStore($storeId);
     $brands = Mage::getModel('hubco_brand/brand')->getAvailableBrands();
@@ -260,17 +342,17 @@ extends Mage_Core_Model_Abstract
 
     //   $base_url = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
     $base_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+    $base_url = substr( $base_url, 0, strrpos( $base_url, '/')+1);
     $media_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
     $types = array ('Integer','Text','Varchar','Decimal','Media');
     $url = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'. $url;
-    $url2 = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'. $url2;
 
     $attributesInfo = Mage::getResourceModel('eav/entity_attribute_collection')
     ->setEntityTypeFilter('4')  //4 = Default - набор атрибутов
     ->addSetInfo()
     ->getData();
 
-    $needed_attribute_codes = array('brand_id','name', 'description', 'url_key', 'image', 'price','map_price',
+    $needed_attribute_codes = array('status', 'brand_id','name', 'description', 'url_key', 'image', 'price','map_price',
       'tax_class_id', 'weight', 'google_taxonomy', 'upc', 'mpn', 'color', 'size', 'gender','google_active');
     $needed_attribute_ids = array();
     $needed_attributes = array();
@@ -290,39 +372,11 @@ extends Mage_Core_Model_Abstract
       return "File Open Error";
     }
 
-    //fill out second file with ad groups for google
-    if ($storeId == Mage::getStoreConfig ('feed_options/motorgoogle/motor_store' )) {
-      $numberProdInGroup = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_num');
-      $cpcValue =  Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_cpc');
-      $campaignName = Mage::getStoreConfig ('feed_options/motorgoogle/motor_ad_name');
-    }
-    else {
-      $numberProdInGroup = Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_num');
-      $cpcValue =  Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_cpc');
-      $campaignName = Mage::getStoreConfig ('feed_options/edgegoogle/edge_ad_name');
-    }
-
-    $fh2 = fopen($url2, "w");
-    if ($fh2 === false) {
-      return "File Open Error";
-    }
-
-    //header of file 2
-    $header = array('Campaign','Ad Group', 'Max CPC', 'Product Group');
-    $strAdGroupArray = array();
-
-      foreach ($header as $val)
-    {
-      $strAdGroupArray [$val]= ' ';
-    }
-
-    $error = fputcsv($fh2, $header);
-
     fwrite ($fh, '<?xml version="1.0"?> <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"> <channel>'.PHP_EOL);
 
     $needed_ids = implode(',', $needed_attribute_ids);
     $websiteID = $store->getWebsiteId();
-    $query = "SET SESSION group_concat_max_len = 8192";
+    $query = "SET SESSION group_concat_max_len = 16000";
     $this->pdoDb->query($query);
     $query = "SELECT  P.*, S.*, PR.*,
     GROUP_CONCAT(DISTINCT CONCAT(D.attribute_id, '|', D.`value`) SEPARATOR ';|;') AS 'Decimal',
@@ -348,10 +402,12 @@ extends Mage_Core_Model_Abstract
     AND S.qty > 0
     AND PR.website_id = $websiteID
     AND PR.customer_group_id = 0
-    GROUP BY P.sku
-    ";
+    GROUP BY P.sku";
     $i = 0;
     foreach ($this->pdoDb->query($query) as $row) {
+      if ($row['status'] == 2) {
+        continue;
+      }
 
       $row = array_merge($row, $this->expl_string($row, $types, $needed_attributes));
       // skip any products that we should not send to google
@@ -510,30 +566,70 @@ extends Mage_Core_Model_Abstract
       fwrite($fh, "</g:custom_label_3>".PHP_EOL);
 
       fwrite ($fh, "</item>".PHP_EOL);
-
-      // write the adwords file data
-      $sessionNum = ceil($row['entity_id']/$numberProdInGroup);
-      $strAdGroupArray['Product Group'] = '* /';
-      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
-      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
-      $strAdGroupArray['Max CPC'] = '';
-      fputcsv($fh2, $strAdGroupArray);
-      $strAdGroupArray['Product Group'] = "* / Item ID='".$row['sku']."'";
-      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
-      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
-      $strAdGroupArray['Max CPC'] = $cpcValue;
-      fputcsv($fh2, $strAdGroupArray);
-      $strAdGroupArray['Product Group'] = "* / Item ID=*";
-      $strAdGroupArray['Campaign'] = $campaignName.$sessionNum;
-      $strAdGroupArray['Ad Group'] = $row['sku']."-".$row['url_key'];
-      $strAdGroupArray['Max CPC'] = 'Excluded';
-      fputcsv($fh2, $strAdGroupArray);
-
     }
-
     fwrite ($fh, '</channel> </rss>'.PHP_EOL);
 
     return $i;
   }
 
+  public function exportMotorSitemap () {
+    $fileName = Mage::getStoreConfig ('feed_options/motorgoogle/sitemap_file');
+    $fileSize = Mage::getStoreConfig ('feed_options/motorgoogle/sitemap_size');
+    $count = $this->exportSitemap(Mage::getStoreConfig ('feed_options/motorgoogle/motor_store' ), $fileName, $fileSize);
+
+  }
+
+  public function exportEdgeSitemap () {
+    $fileName = Mage::getStoreConfig ('feed_options/edgegoogle/sitemap_file');
+    $fileSize = Mage::getStoreConfig ('feed_options/edgegoogle/sitemap_size');
+    $count = $this->exportSitemap(Mage::getStoreConfig ('feed_options/edgegoogle/edge_store' ), $fileName, $fileSize);
+
+  }
+
+  public function exportSitemap($storeID, $fileName, $fileSize) {
+    $store = Mage::app()->getStore($storeID);
+    $base_url = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+    $base_url = substr( $base_url, 0, strrpos( $base_url, '/')+1);
+
+    $url2 = Mage::getStoreConfig ('feed_options/feeds/sitemap_dir') .'/'. $fileName;
+
+    // get the maximum product entity ID to detemine how many Adwords files we need to write
+    $collection = Mage::getModel('catalog/product')->getCollection();
+    $collection->getSelect()->order('entity_id DESC');
+    $collection->setPageSize(1);
+    $maxId = $collection->getFirstItem()->getId();
+
+    $count = ceil($maxId/$fileSize);
+    $fhMaps = array();
+    $urlFront = substr($url2, 0, strpos($url2,'.'));
+    $urlBack = substr($url2, strpos($url2,'.'));
+
+    $fhSingle = fopen($url2,"w");
+    fwrite ($fh, '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL.'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'.PHP_EOL);
+
+    for ($i=0; $i<=$count; $i++) {
+      $urlTemp = $urlFront.$i.$urlBack;
+      $fhMaps[$i] = fopen($urlTemp, "w");
+      fwrite ($fhMaps[$i], '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL.'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'.PHP_EOL);
+    }
+
+    $query = "SELECT P.*, V.value as url_key FROM `catalog_product_entity` P, `catalog_product_entity_varchar` V, `eav_attribute` EA
+      WHERE P.entity_id = V.entity_id
+      AND V.attribute_id = EA.attribute_id
+      AND EA.attribute_code = 'url_key'";
+    $i = 0;
+    foreach ($this->pdoDb->query($query) as $row) {
+      $i++;
+      $fileNum = ceil($row['entity_id']/$fileSize);
+      $url = $base_url.$row['url_key'].".html";
+      fwrite($fhMaps[$fileNum],"<url><loc>$url</loc><changefreq>monthly</changefreq></url>".PHP_EOL);
+      fwrite($fhSingle,"<url><loc>$url</loc><changefreq>monthly</changefreq></url>".PHP_EOL);
+    }
+
+    fwrite ($fhSingle, '</urlset>');
+    for ($i=0; $i<=$count; $i++) {
+      fwrite ($fhMaps[$i], '</urlset>');
+    }
+    return $i;
+  }
 }

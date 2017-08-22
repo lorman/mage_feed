@@ -159,6 +159,22 @@
           <model>hubco_feed/feed::exportMotorGoogle</model>
         </run>
       </hubco_feed_motorGoogle>
+      <hubco_feed_motorMaps>
+        <schedule>
+          <cron_expr>33 21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_feed/feed::exportMotorSitemap</model>
+        </run>
+      </hubco_feed_motorMaps>
+      <hubco_feed_edgeMaps>
+        <schedule>
+          <cron_expr>37 21 * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_feed/feed::exportEdgeSitemap</model>
+        </run>
+      </hubco_feed_edgeMaps>
     </jobs>
   </crontab>
 </config>
