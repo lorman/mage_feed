@@ -352,7 +352,7 @@ extends Mage_Core_Model_Abstract
     ->addSetInfo()
     ->getData();
 
-    $needed_attribute_codes = array('status', 'brand_id','name', 'description', 'url_key', 'image', 'price','map_price',
+    $needed_attribute_codes = array('status', 'brand_id','name', 'description', 'url_key', 'image','map_price',
       'tax_class_id', 'weight', 'google_taxonomy', 'upc', 'mpn', 'color', 'size', 'gender','google_active');
     $needed_attribute_ids = array();
     $needed_attributes = array();
@@ -376,6 +376,11 @@ extends Mage_Core_Model_Abstract
 
     $needed_ids = implode(',', $needed_attribute_ids);
     $websiteID = $store->getWebsiteId();
+    // get free ship threshold from the channel that is associated to this store
+    $storeCode = $store->getCode();
+    $channel = Mage::getModel('hubco_channels/channel')->getByStoreViewCode($storeCode);
+    $freeShipThreshold = $channel[0]['ship_threshold'];
+
     $query = "SET SESSION group_concat_max_len = 16000";
     $this->pdoDb->query($query);
     $query = "SELECT  P.*, S.*, PR.*,
@@ -451,7 +456,7 @@ extends Mage_Core_Model_Abstract
         fwrite ($fh, "<g:shipping_weight>"."1"."</g:shipping_weight>".PHP_EOL);
       }
 
-      if ($row['price'] >= 75 )
+      if ($row['price'] >= $freeShipThreshold )
       {
         fwrite ($fh, "<g:shipping><g:country>US</g:country><g:service>Ground</g:service><g:price>0.00 USD</g:price></g:shipping>".PHP_EOL);
       }
