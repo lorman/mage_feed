@@ -191,7 +191,8 @@ extends Mage_Core_Model_Abstract
       $allCategoriesArray[$key]['amazon_category'] = $category->getResource()->getAttribute('category_hub_amazon_category')->getFrontend()->getValue($category);
     }
 
-    $types = array ('Integer','Text','Varchar','Decimal','Media');
+    //$types = array ('Integer','Text','Varchar','Decimal','Media');
+    $types = array ('int'=>'catalog_product_entity_int','text'=>'catalog_product_entity_text','varchar'=>'catalog_product_entity_varchar','decimal'=>'catalog_product_entity_decimal','media'=>'catalog_product_entity_media_gallery');
 
     $attributesInfo = Mage::getResourceModel('eav/entity_attribute_collection')
     ->setEntityTypeFilter('4')  //4 = Default
@@ -199,17 +200,25 @@ extends Mage_Core_Model_Abstract
     ->getData();
     //'UniqueRetailerID','SKU','ProductTitle','LongDescription','ShortDescription','Brand','ManufacturerModel','MPN','UPC','EAN','OtherReferenceNumber','MerchantCategory','Retailer Price','AMZ MIN PRICE','AMZ MAX PRICE','ImageURL','StockQuantity','ProductURL','Weight','Length','Width','Height','neweggCat','searsCat','jetCat','googleCat','amazonCat','PriceFallsCat','Condition','priceDisc','cost','MSRP','MAPPED','ASIN','ITkeyword','labels','IsFreeShipping','color','size','gender','genderSears','isAmazon','isRakuten','isNewegg','isSears','isJet','isWalmart','Fulfilment Latency','Product Tax Code','ACA Brand'
 
-    $needed_attribute_codes = array('sku','status','name', 'description','short_description','brand_id','mpn','upc', 'image', 'weight', 'google_taxonomy', 'color', 'size', 'gender', 'url_key','asin','walmart_id','msrp'
+    $needed_attribute_codes = array('status','name', 'description','short_description','brand_id','mpn','upc', 'image', 'weight', 'google_taxonomy', 'color', 'size', 'gender', 'url_key','asin','walmart_id','msrp'
       ,'amazon_price', 'amazon_allowed','walmart_price', 'walmart_allowed','sears_price', 'sears_allowed','pricefalls_price', 'pricefalls_allowed','newegg_price', 'newegg_allowed','amazon_repriced','fulfillment_latency' );
     $needed_attribute_ids = array();
     $needed_attributes = array();
     $google_attribute_id;
+
+    $select = '';
+    $leftJoin = '';
+    $i = 0;
+
     foreach($attributesInfo as $attribute) {
       $attribute = Mage::getModel('eav/entity_attribute')->load($attribute['attribute_id']);
       if (in_array($attribute['attribute_code'], $needed_attribute_codes))
       {
         $needed_attribute_ids[] = $attribute['attribute_id'];
         $needed_attributes[$attribute['attribute_id']] = $attribute['attribute_code'];
+        $select .= ", X$i.value as {$attribute['attribute_code']}";
+        $leftJoin .= " LEFT JOIN `{$types[$attribute['backend_type']]}` as X$i ON P.entity_id = X$i.entity_id AND X$i.attribute_id = {$attribute['attribute_id']}";
+        $i++;
       }
     }
 
@@ -218,35 +227,21 @@ extends Mage_Core_Model_Abstract
     $qtyThreshold = Mage::getStoreConfig ('feed_options/all/all_qty_threshold');
     $query = "SET SESSION group_concat_max_len = 16000";
     $this->pdoDb->query($query);
-    $query = "SELECT P.*, S.*, PR.*,MAX(C.entity_id) as category_id,
-    GROUP_CONCAT(DISTINCT CONCAT(D.attribute_id, '|', D.`value`) SEPARATOR ';|;') AS 'Decimal',
-    GROUP_CONCAT(DISTINCT CONCAT(I.attribute_id, '|', I.`value`) SEPARATOR ';|;') as 'Integer',
-    GROUP_CONCAT(DISTINCT CONCAT(T.attribute_id, '|', T.`value`) SEPARATOR ';|;') as 'Text',
-    GROUP_CONCAT(DISTINCT CONCAT(V.attribute_id, '|', V.`value`) SEPARATOR ';|;') as 'Varchar',
-    GROUP_CONCAT(DISTINCT CONCAT(M.attribute_id, '|', M.`value`) SEPARATOR ';|;') as 'Media'
+    $query = "SELECT P.*, S.*, PR.*,MAX(C.entity_id) as category_id $select
     FROM
     (`catalog_product_entity` P,
     `cataloginventory_stock_item` S,
     `catalog_product_index_price` PR
     )
-    LEFT JOIN `catalog_category_product_index` CP ON P.entity_id = CP.product_id AND CP.store_id = 2
+    LEFT JOIN `catalog_category_product_index` CP ON P.entity_id = CP.product_id AND CP.store_id = 1
     LEFT JOIN `catalog_category_entity` C ON C.entity_id = CP.category_id
-    LEFT JOIN `catalog_product_entity_decimal` D ON P.entity_id = D.entity_id
-    AND D.attribute_id IN ($needed_ids)
-    LEFT JOIN `catalog_product_entity_int` I ON I.entity_id =  P.entity_id
-    AND I.attribute_id IN ($needed_ids)
-    LEFT JOIN `catalog_product_entity_text` T ON T.entity_id = P.entity_id
-    AND T.attribute_id IN ($needed_ids)
-    LEFT JOIN `catalog_product_entity_varchar` V ON V.entity_id = P.entity_id
-    AND V.attribute_id IN ($needed_ids)
-    LEFT JOIN `catalog_product_entity_media_gallery` M ON  M.entity_id = P.entity_id
+    $leftJoin
     WHERE S.product_id = P.entity_id
     AND P.entity_id =  PR.entity_id
     AND PR.website_id = $websiteID
     AND PR.customer_group_id = 0
     AND S.qty > $qtyThreshold
     GROUP BY P.sku";
-
     $url = Mage::getStoreConfig ('feed_options/feeds/export_dir') .'/'. $url;
     $fh = fopen($url, "w");
     if ($fh === false) {
@@ -275,7 +270,7 @@ extends Mage_Core_Model_Abstract
       }
       //$strProdArray = array();
       $categoryBySku['pathStr'] = $allCategoriesArray[$row['category_id']]['pathStr'];
-      $row = array_merge($row, $this->expl_string($row, $types, $needed_attributes), $categoryBySku);
+      //$row = array_merge($row, $this->expl_string($row, $types, $needed_attributes), $categoryBySku);
 
       $strProdArray['SKU'] = $row['sku'];
       $strProdArray['ProductTitle'] = $row['name'];
