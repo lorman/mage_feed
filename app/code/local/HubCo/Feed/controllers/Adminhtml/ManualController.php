@@ -141,6 +141,14 @@ class HubCo_Feed_Adminhtml_ManualController
       );
     }
 
+    public function fixStateAbbreviationsAction(){
+      Mage::getSingleton('hubco_feed/fixes')->fixStateAbbreviations();
+
+      return $this->_redirect(
+          'hubco_feed_admin/manual/index'
+      );
+    }
+
     /**
      * Thanks to Ben for pointing out this method was missing. Without
      * this method the ACL rules configured in adminhtml.xml are ignored.

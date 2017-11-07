@@ -175,6 +175,14 @@
           <model>hubco_feed/feed::exportEdgeSitemap</model>
         </run>
       </hubco_feed_edgeMaps>
+      <hubco_feed_fixAbbreviations>
+        <schedule>
+          <cron_expr>12 * * * *</cron_expr>
+        </schedule>
+        <run>
+          <model>hubco_feed/fixes::fixStateAbbreviations</model>
+        </run>
+      </hubco_feed_fixAbbreviations>
     </jobs>
   </crontab>
 </config>
