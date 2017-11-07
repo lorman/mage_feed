@@ -201,7 +201,7 @@ extends Mage_Core_Model_Abstract
     //'UniqueRetailerID','SKU','ProductTitle','LongDescription','ShortDescription','Brand','ManufacturerModel','MPN','UPC','EAN','OtherReferenceNumber','MerchantCategory','Retailer Price','AMZ MIN PRICE','AMZ MAX PRICE','ImageURL','StockQuantity','ProductURL','Weight','Length','Width','Height','neweggCat','searsCat','jetCat','googleCat','amazonCat','PriceFallsCat','Condition','priceDisc','cost','MSRP','MAPPED','ASIN','ITkeyword','labels','IsFreeShipping','color','size','gender','genderSears','isAmazon','isRakuten','isNewegg','isSears','isJet','isWalmart','Fulfilment Latency','Product Tax Code','ACA Brand'
 
     $needed_attribute_codes = array('status','name', 'description','short_description','brand_id','mpn','upc', 'image', 'weight', 'google_taxonomy', 'color', 'size', 'gender', 'url_key','asin','walmart_id','msrp'
-      ,'amazon_price', 'amazon_allowed','walmart_price', 'walmart_allowed','sears_price', 'sears_allowed','pricefalls_price', 'pricefalls_allowed','newegg_price', 'newegg_allowed','amazon_repriced','fulfillment_latency' );
+      ,'amazon_price', 'amazon_allowed','walmart_price', 'walmart_allowed','sears_price', 'sears_allowed','pricefalls_price', 'pricefalls_allowed','newegg_price', 'newegg_allowed','amazon_repriced','fulfillment_latency','ebay_price','ebay_qty','qty_hub' );
     $needed_attribute_ids = array();
     $needed_attributes = array();
     $google_attribute_id;
@@ -252,7 +252,7 @@ extends Mage_Core_Model_Abstract
     'Price','Amazon Price','Amazon RePriced','Walmart Price', 'PriceFalls Price', 'Jet Price', 'New Egg Price', 'Sears Price',
     'neweggCat','searsCat','jetCat','googleCat','amazonCat','PriceFallsCat','WalmartCat',
     'Condition','MSRP','ASIN','WalmartID','ITkeyword','color','size','gender',
-    'Amazon Allowed','Newegg Allowed','Sears Allowed','Jet Allowed','Walmart Allowed','PriceFalls Allowed','Fulfilment Latency');
+    'Amazon Allowed','Newegg Allowed','Sears Allowed','Jet Allowed','Walmart Allowed','PriceFalls Allowed','Fulfilment Latency','Ebay Price','Ebay Qty');
 
     $error = fputcsv($fh, $header);
     // make array with keys from header
@@ -322,6 +322,14 @@ extends Mage_Core_Model_Abstract
       $strProdArray['PriceFalls Allowed'] = $row['pricefalls_allowed'];
 
       $strProdArray['Fulfilment Latency'] = $row['fulfillment_latency'];
+
+      $strProdArray['Ebay Price'] = $row['ebay_price'];
+      if ($row['qty_hub'] > 0) {
+        $strProdArray['Ebay Qty'] = 1;
+      }
+      if ($row['ebay_qty'] > 0) {
+        $strProdArray['Ebay Qty'] = $row['ebay_qty'];
+      }
 
       $error = fputcsv($fh,$strProdArray);
     }
